@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin Control Center - Construction Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 antialiased min-h-screen">
+
+    <div class="bg-slate-900 text-slate-400 text-[11px] px-4 py-2 border-b border-slate-800 flex justify-between items-center shadow-xs">
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5 font-bold text-blue-400">
+                <span class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span> SYSTEM OK
+            </span>
+            <span>Environment: <strong class="text-white">Shared Local Storage DB Engine</strong></span>
+        </div>
+        <div class="text-right font-mono">Control System Terminal v5.2</div>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+        
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-5">
+            <div>
+                <span class="text-xs font-black text-blue-600 uppercase tracking-widest">Administrative Database Configuration</span>
+                <h1 class="text-3xl font-black tracking-tight text-slate-900 mt-0.5">Master Program Engine Setup</h1>
+                <p class="text-sm text-slate-500">Configure core operational frameworks, dynamic crews, contract agreements, and baseline targets.</p>
+            </div>
+            
+            <div class="flex flex-wrap gap-2">
+                <button onclick="exportSystemDatabase()" class="bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1">
+                    📥 Export Database Backup
+                </button>
+                
+                <label class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1">
+                    📤 Import Backup JSON
+                    <input type="file" accept=".json" onchange="importSystemDatabase(event)" class="hidden">
+                </label>
+
+                <button onclick="systemMasterHardReset()" class="bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer">
+                    ⚠️ Wipe & Reset Test Database
+                </button>
+            </div>
+        </header>
+
+        <div class="flex flex-wrap border-b border-slate-200 bg-slate-100 p-1.5 rounded-xl gap-1">
+            <button onclick="switchAdminTab('tab-step1')" id="btn-tab-step1" 
+                class="flex-1 min-w-[140px] text-center font-bold px-4 py-2.5 rounded-lg text-xs transition-all cursor-pointer bg-white text-blue-700 shadow-xs border border-slate-200/50">
+                💼 Step 1: Permanent Baseline
+            </button>
+            <button onclick="switchAdminTab('tab-step3')" id="btn-tab-step3" 
+                class="flex-1 min-w-[140px] text-center font-bold px-4 py-2.5 rounded-lg text-xs transition-all cursor-pointer text-slate-600 hover:bg-white/60">
+                🛠️ Step 3: Temporary Staff Registry
+            </button>
+            <button onclick="switchAdminTab('tab-step2')" id="btn-tab-step2" 
+                class="flex-1 min-w-[140px] text-center font-bold px-4 py-2.5 rounded-lg text-xs transition-all cursor-pointer text-slate-600 hover:bg-white/60">
+                📅 Step 2: Master Schedules
+            </button>
+            <button onclick="switchAdminTab('tab-step4')" id="btn-tab-step4" 
+                class="flex-1 min-w-[140px] text-center font-bold px-4 py-2.5 rounded-lg text-xs transition-all cursor-pointer text-slate-600 hover:bg-white/60">
+                🏗️ Step 4: Assignment Context
+            </button>
+            <button onclick="switchAdminTab('tab-step5')" id="btn-tab-step5" 
+                class="flex-1 min-w-[140px] text-center font-bold px-4 py-2.5 rounded-lg text-xs transition-all cursor-pointer text-slate-600 hover:bg-white/60">
+                🚀 Step 5: Common Activity Crews
+            </button>
+        </div>
+
+        <div id="tab-step1" class="tab-content-node block space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs h-fit space-y-4">
+                    <div>
+                        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">Add Position Requirement</h2>
+                    </div>
+                    <form id="step1Form" onsubmit="handleStep1Submit(event)" class="space-y-4">
+                        <input type="hidden" id="s1EditingKey" value="">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Position Title Designation</label>
+                            <select id="s1RoleSelector" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="">-- Choose Position --</option>
+                                <option value="Project Manager">Project Manager</option>
+                                <option value="Site Engineer">Site Engineer</option>
+                                <option value="Office Engineer">Office Engineer</option>
+                                <option value="Health and Safety Engineer">Health and Safety Engineer</option>
+                                <option value="Quantity Surveyor">Quantity Surveyor</option>
+                                <option value="Construction Engineer">Construction Engineer</option>
+                                <option value="Foreman">Foreman</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Contractual Required Count</label>
+                            <input type="number" id="s1QtyInput" required min="1" placeholder="e.g., 1"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-bold text-center focus:ring-2 focus:ring-blue-500 focus:outline-none focus:bg-white">
+                        </div>
+                        <button type="submit" id="s1SubmitBtn" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-black text-xs py-2.5 rounded-lg transition-colors tracking-wide uppercase cursor-pointer">
+                            Add to Master Baseline
+                        </button>
+                    </form>
+                </div>
+                <div class="md:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                    <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
+                        <h2 class="text-sm font-bold tracking-wide">Master Permanent Requirement List</h2>
+                        <span id="s1CountBadge" class="bg-blue-600 font-black text-white text-xs px-2.5 py-0.5 rounded-full">0 Roles</span>
+                    </div>
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 font-bold text-slate-500 uppercase text-[10px] border-b border-slate-200">
+                            <tr>
+                                <th class="p-3 pl-5 w-16">#</th>
+                                <th class="p-3 w-full">Permanent Staff Position Name</th>
+                                <th class="p-3 text-center w-32 bg-blue-50/40 text-blue-900">Required Count</th>
+                                <th class="p-3 text-center w-28">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="s1TableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-step3" class="tab-content-node hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs h-fit space-y-4">
+                    <div>
+                        <h2 id="s3FormTitle" class="text-sm font-black text-slate-800 uppercase tracking-wide">Register New Skillset Trade</h2>
+                    </div>
+                    <form id="step3Form" onsubmit="handleStep3Submit(event)" class="space-y-4">
+                        <input type="hidden" id="s3EditingIndex" value="-1">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Trade/Craft Name</label>
+                            <input type="text" id="s3TradeName" required placeholder="e.g., Bar Bender"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+
+                        <div id="s3PasteWrapper" class="border-t border-slate-200 pt-3">
+                            <label class="block text-[10px] font-black text-blue-600 uppercase mb-1 flex justify-between items-center">
+                                <span>📋 Quick Paste from Excel Option</span>
+                                <span class="text-[9px] text-slate-400 font-normal normal-case">One trade item per row line</span>
+                            </label>
+                            <textarea id="s3ExcelPaste" rows="4" class="w-full font-mono text-[10px] bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                placeholder="Plumber&#10;Electrician&#10;Painter Helper"></textarea>
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" id="s3SubmitBtn" class="flex-1 bg-blue-700 hover:bg-blue-800 text-white font-black text-xs py-2.5 rounded-lg transition-colors tracking-wide uppercase cursor-pointer">
+                                Register Labor Trade
+                            </button>
+                            <button type="button" id="s3CancelBtn" onclick="resetStep3FormState()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs px-3 rounded-lg cursor-pointer">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="md:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                    <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
+                        <h2 class="text-sm font-bold tracking-wide">Registered Skillset Trade Registry</h2>
+                        <span id="s3CountBadge" class="bg-blue-600 font-black text-white text-xs px-2.5 py-0.5 rounded-full">0 Trades</span>
+                    </div>
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 font-bold text-slate-500 uppercase text-[10px] border-b border-slate-200">
+                            <tr>
+                                <th class="p-3 pl-5 w-16">ID</th>
+                                <th class="p-3 w-full">Labor Resource Trade Designation</th>
+                                <th class="p-3 text-center w-40">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="s3TableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-step2" class="tab-content-node hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                
+                <div class="lg:col-span-1 bg-white rounded-2xl p-5 border border-slate-200 shadow-xs h-fit space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 id="s2FormTitle" class="text-xs font-black text-slate-800 uppercase tracking-wider">New Schedule Profile</h2>
+                        <button id="s2FormResetBtn" onclick="resetStep2FormState()" class="hidden text-xs text-blue-600 hover:text-blue-800 font-bold underline cursor-pointer">
+                            + Create New Instead
+                        </button>
+                    </div>
+                    
+                    <form id="step2ProfileForm" onsubmit="handleStep2ProfileSubmit(event)" class="space-y-4">
+                        <input type="hidden" id="s2EditingProfileIndex" value="-1">
+                        
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Master Schedule Name</label>
+                            <input type="text" id="s2ProfileName" required placeholder="e.g., G+12 Structural Work Sequence"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none focus:bg-white">
+                        </div>
+
+                        <div id="s2PasteBoxContainer">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 flex justify-between items-center">
+                                <span>Excel Copy-Paste Area</span>
+                                <span class="text-[9px] text-blue-600 font-bold tracking-tight">Supports Crew Mappings!</span>
+                            </label>
+                            <textarea id="s2ExcelPaste" rows="6" 
+                                class="w-full font-mono text-[10px] bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none focus:bg-white custom-scrollbar"
+                                placeholder="Columns layout option A (5 items):&#10;1&#9;Excavation&#9;10&#9;2026-06-01&#9;2026-06-11&#10;&#10;Columns layout option B (6 items with crews):&#10;1&#9;Excavation&#9;10&#9;2026-06-01&#9;2026-06-11&#9;Daily Laborer:4, Mason:2"></textarea>
+                            <span class="text-[9px] text-slate-400 block mt-1 leading-tight">Tip: Separate trades with a comma in the 6th column to automatically construct bulk crew settings.</span>
+                        </div>
+                        
+                        <button type="submit" id="s2SubmitBtn" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-black text-xs py-2.5 rounded-lg transition-all tracking-wide uppercase cursor-pointer shadow-xs">
+                            Save New Profile Template
+                        </button>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-3 space-y-4">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                        
+                        <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
+                            <div>
+                                <h2 class="text-sm font-bold tracking-wide">Master Gantt Templates</h2>
+                                <p class="text-[10px] text-slate-400">Configure crews and targets inline for any active schedule profile</p>
+                            </div>
+                            <span id="s2ProfileCounter" class="bg-purple-600 font-black text-white text-xs px-2.5 py-0.5 rounded-full">0 Profiles</span>
+                        </div>
+                
+                        <div id="s2TabStrip" class="flex flex-wrap border-b border-slate-200 bg-slate-100 p-2 gap-1.5"></div>
+
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs table-fixed min-w-[1100px]">
+                                <thead class="bg-slate-50 font-bold text-slate-500 uppercase text-[10px] border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3 pl-4 w-12 text-center">ID</th>
+                                        <th class="p-3 w-44">Task Description</th>
+                                        <th class="p-3 text-center w-16">Dur.</th>
+                                        <th class="p-3 text-center w-24">Start Date</th>
+                                        <th class="p-3 text-center w-24">Finish Date</th>
+                                        <th class="p-3 w-80 text-emerald-900 bg-emerald-50/40 border-x border-slate-200">Crew Configuration Setup</th>
+                                        <th class="p-3 text-center w-24 text-blue-900 bg-blue-50/40">Productivity</th>
+                                        <th class="p-3 text-center w-20">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="s2TaskTableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="s2DangerZone" class="text-right hidden">
+                        <button onclick="deleteActiveProfileSequence()" class="text-xs text-red-500 hover:text-red-700 font-bold transition-colors cursor-pointer p-1">
+                            🗑️ Delete Entire Selected Profile
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="tab-step4" class="tab-content-node hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs h-fit space-y-4">
+                    <div>
+                        <h2 id="s4FormTitle" class="text-sm font-black text-slate-800 uppercase tracking-wide">Register Field Assignment</h2>
+                        <p class="text-xs text-slate-400">Map specific contractor assignments and site information details below.</p>
+                    </div>
+                    
+                    <form id="step4ContextForm" onsubmit="handleStep4Submit(event)" class="space-y-4">
+                        <input type="hidden" id="s4EditingIndex" value="-1">
+                        
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Contractor Firm Name</label>
+                            <input type="text" id="s4Contractor" required placeholder="e.g., Al-Mansoori Contracting"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none focus:bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Block / Location Number</label>
+                            <input type="text" id="s4Block" required placeholder="e.g., Block C"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none focus:bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Building Typology Scope</label>
+                            <input type="text" id="s4Typology" required placeholder="e.g., Residential B+G+5 Tower"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none focus:bg-white">
+                        </div>
+
+                        <div id="s4PasteWrapper" class="border-t border-slate-200 pt-3">
+                            <label class="block text-[10px] font-black text-blue-600 uppercase mb-1 flex justify-between items-center">
+                                <span>📋 Quick Paste from Excel Option</span>
+                                <span class="text-[9px] text-slate-400 font-normal normal-case">Columns: Contractor | Block | Typology</span>
+                            </label>
+                            <textarea id="s4ExcelPaste" rows="3" class="w-full font-mono text-[10px] bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                placeholder="Apex Build&#9;Block B&#9;Commercial Hub"></textarea>
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" id="s4SubmitBtn" class="flex-1 bg-blue-700 hover:bg-blue-800 text-white font-black text-xs py-2.5 rounded-lg transition-colors tracking-wide uppercase cursor-pointer">
+                                Save Assignment Row
+                            </button>
+                            <button type="button" id="s4CancelBtn" onclick="resetStep4FormState()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs px-3 rounded-lg cursor-pointer">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                    <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
+                        <div>
+                            <h2 class="text-sm font-bold tracking-wide">Step 4: Active Validation Frameworks Registry</h2>
+                            <p class="text-[10px] text-slate-400">These mappings update dropdown selection fields across the main application boards</p>
+                        </div>
+                        <span id="s4CountBadge" class="bg-blue-600 font-black text-white text-xs px-2.5 py-0.5 rounded-full">0 Registered</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs whitespace-nowrap">
+                            <thead class="bg-slate-50 font-bold text-slate-500 uppercase text-[10px] border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3 pl-5">Contractor Firm</th>
+                                    <th class="p-3">Block / Location</th>
+                                    <th class="p-3">Typology Specification</th>
+                                    <th class="p-3 text-center w-28">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="s4TableBody" class="divide-y divide-slate-200 bg-white">
+                                <tr><td colspan="4" class="p-8 text-center text-slate-400 italic">No tracking alignments set.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-step5" class="tab-content-node hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs h-fit space-y-4">
+                    <div>
+                        <h2 id="s5FormTitle" class="text-sm font-black text-slate-800 uppercase tracking-wide">Configure Reusable Crew</h2>
+                        <p class="text-xs text-slate-400">Create activity presets to instantly deploy crew allocations across your pipelines.</p>
+                    </div>
+                    
+                    <form id="step5CrewForm" onsubmit="handleStep5Submit(event)" class="space-y-4">
+                        <input type="hidden" id="s5EditingIndex" value="-1">
+                        
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Activity / Template Name</label>
+                            <input type="text" id="s5ActivityName" required placeholder="e.g., Standard Blockwork Crew"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none focus:bg-white">
+                        </div>
+
+                        <div id="s5PasteWrapper">
+                            <label class="block text-[10px] font-black text-blue-600 uppercase mb-1 flex justify-between items-center">
+                                <span>📋 Bulk Activity Paste Option</span>
+                                <span class="text-[9px] text-slate-400 font-normal normal-case">Columns: Activity Name | Crew String</span>
+                            </label>
+                            <textarea id="s5ExcelPaste" rows="4" class="w-full font-mono text-[10px] bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                placeholder="Plastering Crew&#9;Mason:4, Daily Laborer:3&#10;Tile Setup Team&#9;Mason:2, Daily Laborer:2"></textarea>
+                        </div>
+
+                        <div id="s5RowConfigurator" class="border-t border-slate-200 pt-3 space-y-3">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase">Manual Crew Assignment</label>
+                            <div class="flex gap-1.5">
+                                <select id="s5TradeSelector" class="flex-1 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <option value="">-- Choose Trade --</option>
+                                </select>
+                                <input type="number" id="s5TradeCount" min="1" placeholder="Qty" class="w-16 bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-center focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <button type="button" onclick="addTradeToManualS5Stack()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3 rounded-lg cursor-pointer">Add</button>
+                            </div>
+                            
+                            <div id="s5ManualStackBox" class="bg-slate-50 border border-slate-200 rounded-lg p-2 max-h-32 overflow-y-auto space-y-1 custom-scrollbar">
+                                <span class="text-[10px] text-slate-400 italic block text-center py-2">No individual manual assignments drafted yet.</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" id="s5SubmitBtn" class="flex-1 bg-blue-700 hover:bg-blue-800 text-white font-black text-xs py-2.5 rounded-lg transition-colors tracking-wide uppercase cursor-pointer">
+                                Save Crew Template
+                            </button>
+                            <button type="button" id="s5CancelBtn" onclick="resetStep5FormState()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs px-3 rounded-lg cursor-pointer">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                    <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
+                        <div>
+                            <h2 class="text-sm font-bold tracking-wide">Step 5: Common Activity Blueprint Profiles Directory</h2>
+                            <p class="text-[10px] text-slate-400">Pre-configured setups available for high-frequency deployment scenarios</p>
+                        </div>
+                        <span id="s5CountBadge" class="bg-purple-600 font-black text-white text-xs px-2.5 py-0.5 rounded-full">0 Activities</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs whitespace-nowrap">
+                            <thead class="bg-slate-50 font-bold text-slate-500 uppercase text-[10px] border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3 pl-5 w-12 text-center">#</th>
+                                    <th class="p-3 w-48">Activity Template Context</th>
+                                    <th class="p-3">Configured Crew Matrix Composition</th>
+                                    <th class="p-3 text-center w-28">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="s5TableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const STORAGE_S1_KEY = "werwer_global_permanent_db";
+        const STORAGE_S2_KEY = "werwer_master_profiles_db";
+        const STORAGE_S3_KEY = "werwer_trades_db";
+        const STORAGE_S4_KEY = "werwer_project_context_db";
+        const STORAGE_S5_KEY = "werwer_common_crews_db";
+
+        let s1GlobalPermanentPlan = {};
+        let s2MasterProfilesList = [];
+        let s3TradesList = [];
+        let s4ContextRegistry = [];
+        let s5CommonCrewsRegistry = [];
+        
+        let s2ActiveProfileIndex = 0;
+        let s5ManualFormDraftStack = {};
+
+        window.addEventListener("DOMContentLoaded", () => {
+            loadAllDatabaseNodes();
+            ensureTestSeedData();
+            renderStep1Table();
+            renderStep3Table();
+            renderStep2TabsAndTable();
+            renderStep4Table();
+            renderStep5Table();
+            populateStep5TradeSelectors();
+        });
+
+        // ==========================================
+        // SYSTEM BACKUP & RESTORE UTILITY ENGINE
+        // ==========================================
+        function exportSystemDatabase() {
+            const backup = {
+                s1: localStorage.getItem(STORAGE_S1_KEY),
+                s2: localStorage.getItem(STORAGE_S2_KEY),
+                s3: localStorage.getItem(STORAGE_S3_KEY),
+                s4: localStorage.getItem(STORAGE_S4_KEY),
+                s5: localStorage.getItem(STORAGE_S5_KEY)
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "construction_hub_db_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importSystemDatabase(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    if(backup.s1) localStorage.setItem(STORAGE_S1_KEY, backup.s1);
+                    if(backup.s2) localStorage.setItem(STORAGE_S2_KEY, backup.s2);
+                    if(backup.s3) localStorage.setItem(STORAGE_S3_KEY, backup.s3);
+                    if(backup.s4) localStorage.setItem(STORAGE_S4_KEY, backup.s4);
+                    if(backup.s5) localStorage.setItem(STORAGE_S5_KEY, backup.s5);
+                    
+                    alert("Database successfully restored! Recompiling page layout framework...");
+                    window.location.reload();
+                } catch(err) {
+                    alert("CRITICAL ERROR: Invalid JSON template structure format.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function loadAllDatabaseNodes() {
+            s1GlobalPermanentPlan = JSON.parse(localStorage.getItem(STORAGE_S1_KEY)) || {};
+            s2MasterProfilesList = JSON.parse(localStorage.getItem(STORAGE_S2_KEY)) || [];
+            s3TradesList = JSON.parse(localStorage.getItem(STORAGE_S3_KEY)) || [];
+            s4ContextRegistry = JSON.parse(localStorage.getItem(STORAGE_S4_KEY)) || [];
+            s5CommonCrewsRegistry = JSON.parse(localStorage.getItem(STORAGE_S5_KEY)) || [];
+            
+            if(s2MasterProfilesList.length > 0 && (s2ActiveProfileIndex === -1 || s2ActiveProfileIndex >= s2MasterProfilesList.length)) {
+                s2ActiveProfileIndex = 0;
+            }
+        }
+
+        function ensureTestSeedData() {
+            if(Object.keys(s1GlobalPermanentPlan).length === 0 && s2MasterProfilesList.length === 0 && s4ContextRegistry.length === 0 && s5CommonCrewsRegistry.length === 0) {
+                s1GlobalPermanentPlan = { "Project Manager": 1, "Site Engineer": 2, "Office Engineer": 1, "Foreman": 2 };
+                localStorage.setItem(STORAGE_S1_KEY, JSON.stringify(s1GlobalPermanentPlan));
+
+                s3TradesList = [ { name: "Bar Bender" }, { name: "Carpenter" }, { name: "Daily Laborer" }, { name: "Mason" } ];
+                localStorage.setItem(STORAGE_S3_KEY, JSON.stringify(s3TradesList));
+
+                s2MasterProfilesList = [{
+                    name: "G+12 Structural Work Sequence",
+                    tasks: [
+                        { id: "1", taskName: "Excavation and Shoring", duration: "10", startDate: "2026-06-01", finishDate: "2026-06-11", crewFormations: { "Daily Laborer": 4 }, productivityRate: "120" },
+                        { id: "2", taskName: "Blinding Concrete C20", duration: "4", startDate: "2026-06-12", finishDate: "2026-06-16", crewFormations: { "Daily Laborer": 6, "Mason": 2 }, productivityRate: "45" },
+                        { id: "3", taskName: "Reinforcement Foundation", duration: "8", startDate: "2026-06-17", finishDate: "2026-06-25", crewFormations: { "Bar Bender": 12, "Daily Laborer": 3 }, productivityRate: "8.5" }
+                    ]
+                }];
+                localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
+                s2ActiveProfileIndex = 0;
+
+                s4ContextRegistry = [
+                    { contractor: "werwer con.", block: "Block A", typology: "B+G+12 Residential Block" },
+                    { contractor: "Al-Mansoori Contracting", block: "Block B", typology: "Commercial Warehouse G+1" },
+                    { contractor: "Apex Build Systems", block: "Block C", typology: "Infrastructure Pump House" }
+                ];
+                localStorage.setItem(STORAGE_S4_KEY, JSON.stringify(s4ContextRegistry));
+
+                s5CommonCrewsRegistry = [
+                    { activityName: "Standard Shuttering Setup", crewFormations: { "Carpenter": 4, "Daily Laborer": 2 } },
+                    { activityName: "Heavy Blockwork Team", crewFormations: { "Mason": 5, "Daily Laborer": 4 } }
+                ];
+                localStorage.setItem(STORAGE_S5_KEY, JSON.stringify(s5CommonCrewsRegistry));
+
+                loadAllDatabaseNodes();
+            }
+        }
+
+        function switchAdminTab(activeTabId) {
+            document.querySelectorAll('.tab-content-node').forEach(node => node.classList.add('hidden'));
+            document.getElementById(activeTabId).classList.remove('hidden');
+
+            ['tab-step1', 'tab-step2', 'tab-step3', 'tab-step4', 'tab-step5'].forEach(id => {
+                const btn = document.getElementById(`btn-${id}`);
+                if (btn) {
+                    btn.className = (id === activeTabId)
+                        ? "flex-1 min-w-[140px] text-center font-bold px-4 py-2.5 rounded-lg text-xs transition-all cursor-pointer bg-white text-blue-700 shadow-xs border border-slate-200/50"
+                        : "flex-1 min-w-[140px] text-center font-bold px-4 py-2.5 rounded-lg text-xs transition-all cursor-pointer text-slate-600 hover:bg-white/60";
+                }
+            });
+            if(activeTabId === 'tab-step2' || activeTabId === 'tab-step5') {
+                populateStep5TradeSelectors();
+            }
+        }
+
+        // ==========================================
+        // STEP 1 WORKSPACE METHODS
+        // ==========================================
+        function renderStep1Table() {
+            const tbody = document.getElementById("s1TableBody");
+            const roles = Object.keys(s1GlobalPermanentPlan);
+            document.getElementById("s1CountBadge").innerText = `${roles.length} Roles`;
+            tbody.innerHTML = "";
+            roles.forEach((role, idx) => {
+                const qty = s1GlobalPermanentPlan[role];
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/60 transition-colors">
+                        <td class="p-3 pl-5 font-mono text-slate-400 font-bold">${idx + 1}</td>
+                        <td class="p-3 font-bold text-slate-800">${role}</td>
+                        <td class="p-3 text-center bg-blue-50/30 font-black text-blue-700 text-sm border-x border-slate-100">${qty}</td>
+                        <td class="p-3 text-center space-x-3">
+                            <button onclick="deleteStep1Node('${role}')" class="text-red-500 hover:text-red-700 font-medium cursor-pointer">Remove</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function handleStep1Submit(e) {
+            e.preventDefault();
+            const role = document.getElementById("s1RoleSelector").value;
+            const qty = parseInt(document.getElementById("s1QtyInput").value) || 1;
+            s1GlobalPermanentPlan[role] = qty;
+            localStorage.setItem(STORAGE_S1_KEY, JSON.stringify(s1GlobalPermanentPlan));
+            document.getElementById("step1Form").reset(); renderStep1Table();
+        }
+
+        function deleteStep1Node(role) {
+            if(confirm(`Remove "${role}" baseline?`)) {
+                delete s1GlobalPermanentPlan[role];
+                localStorage.setItem(STORAGE_S1_KEY, JSON.stringify(s1GlobalPermanentPlan));
+                renderStep1Table();
+            }
+        }
+
+        // ==========================================
+        // STEP 3 WORKSPACE METHODS
+        // ==========================================
+        function renderStep3Table() {
+            const tbody = document.getElementById("s3TableBody");
+            document.getElementById("s3CountBadge").innerText = `${s3TradesList.length} Trades`;
+            tbody.innerHTML = "";
+            s3TradesList.forEach((trade, idx) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/60 transition-colors">
+                        <td class="p-3 pl-5 font-mono text-slate-400 font-bold">TRD-${100 + idx}</td>
+                        <td class="p-3 font-bold text-slate-800">${trade.name}</td>
+                        <td class="p-3 text-center space-x-3">
+                            <button onclick="editStep3Node(${idx})" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Modify</button>
+                            <button onclick="deleteStep3Node(${idx})" class="text-red-500 hover:text-red-700 font-medium cursor-pointer">Delete</button>
+                        </td>
+                    </tr>`;
+            });
+            populateStep5TradeSelectors();
+        }
+
+        function handleStep3Submit(e) {
+            e.preventDefault();
+            const nameVal = document.getElementById("s3TradeName").value.trim();
+            const pasteData = document.getElementById("s3ExcelPaste").value;
+            const editingIdx = parseInt(document.getElementById("s3EditingIndex").value);
+
+            if (editingIdx === -1) {
+                if(pasteData.trim()) {
+                    let lines = pasteData.split(/\r?\n/);
+                    lines.forEach(line => {
+                        if(!line.trim()) return;
+                        s3TradesList.push({ name: line.trim() });
+                    });
+                } else {
+                    if(nameVal) s3TradesList.push({ name: nameVal });
+                }
+            } else {
+                s3TradesList[editingIdx].name = nameVal;
+            }
+
+            localStorage.setItem(STORAGE_S3_KEY, JSON.stringify(s3TradesList));
+            resetStep3FormState(); 
+            renderStep3Table();
+        }
+
+        function editStep3Node(idx) {
+            const data = s3TradesList[idx];
+            document.getElementById("s3EditingIndex").value = idx;
+            document.getElementById("s3TradeName").value = data.name;
+
+            document.getElementById("s3FormTitle").innerText = "✏️ Edit Skillset Trade";
+            document.getElementById("s3SubmitBtn").innerText = "Apply Update";
+            document.getElementById("s3PasteWrapper").style.display = "none";
+            document.getElementById("s3CancelBtn").classList.remove("hidden");
+        }
+
+        function resetStep3FormState() {
+            document.getElementById("s3EditingIndex").value = "-1";
+            document.getElementById("step3Form").reset();
+            document.getElementById("s3FormTitle").innerText = "Register New Skillset Trade";
+            document.getElementById("s3SubmitBtn").innerText = "Register Labor Trade";
+            document.getElementById("s3PasteWrapper").style.display = "block";
+            document.getElementById("s3CancelBtn").classList.add("hidden");
+        }
+
+        function deleteStep3Node(idx) {
+            if(confirm(`Delete "${s3TradesList[idx].name}" trade?`)) {
+                s3TradesList.splice(idx, 1);
+                localStorage.setItem(STORAGE_S3_KEY, JSON.stringify(s3TradesList));
+                resetStep3FormState();
+                renderStep3Table();
+            }
+        }
+
+        // ==========================================
+        // STEP 2 WORKSPACE UPGRADED BULK PARSER ENGINE
+        // ==========================================
+        function handleStep2ProfileSubmit(e) {
+            e.preventDefault();
+            const nameVal = document.getElementById("s2ProfileName").value.trim();
+            const pasteArea = document.getElementById("s2ExcelPaste").value;
+            const trackingIdx = parseInt(document.getElementById("s2EditingProfileIndex").value);
+
+            if (trackingIdx === -1) {
+                if(!pasteArea.trim()) {
+                    alert("Please paste Excel baseline timeline rows to compile tasks matrix.");
+                    return;
+                }
+
+                let parsedTasks = [];
+                const lines = pasteArea.split(/\r?\n/);
+                
+                lines.forEach(line => {
+                    if(!line.trim()) return;
+                    const cells = line.split('\t');
+                    if(cells.length >= 4) {
+                        let parsedCrews = {};
+                        if (cells.length >= 6 && cells[5].trim()) {
+                            const rawCrewString = cells[5].trim();
+                            const configurationParts = rawCrewString.split(',');
+                            configurationParts.forEach(part => {
+                                const chunk = part.split(':');
+                                if (chunk.length === 2) {
+                                    const tradeName = chunk[0].trim();
+                                    const craftQuantity = parseInt(chunk[1].trim()) || 0;
+                                    if (tradeName && craftQuantity > 0) {
+                                        parsedCrews[tradeName] = craftQuantity;
+                                    }
+                                }
+                            });
+                        }
+
+                        parsedTasks.push({
+                            id: cells[0].trim(),
+                            taskName: cells[1].trim(),
+                            duration: cells[2].trim(),
+                            startDate: cells[3].trim(),
+                            finishDate: cells[4] ? cells[4].trim() : "",
+                            crewFormations: parsedCrews,
+                            productivityRate: ""
+                        });
+                    }
+                });
+
+                if(parsedTasks.length === 0) {
+                    alert("Formatting mismatch error. Ensure you copy clear data columns from Excel.");
+                    return;
+                }
+
+                s2MasterProfilesList.push({ name: nameVal, tasks: parsedTasks });
+                s2ActiveProfileIndex = s2MasterProfilesList.length - 1;
+            } else {
+                s2MasterProfilesList[trackingIdx].name = nameVal;
+            }
+
+            localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
+            resetStep2FormState();
+            renderStep2TabsAndTable();
+        }
+
+        function renderStep2TabsAndTable() {
+            const stripNode = document.getElementById("s2TabStrip");
+            const countBadge = document.getElementById("s2ProfileCounter");
+            const dangerZone = document.getElementById("s2DangerZone");
+            
+            stripNode.innerHTML = "";
+            countBadge.innerText = `${s2MasterProfilesList.length} Profiles`;
+
+            if(s2MasterProfilesList.length === 0) {
+                s2ActiveProfileIndex = -1;
+                dangerZone.classList.add("hidden");
+                document.getElementById("s2TaskTableBody").innerHTML = `
+                    <tr><td colspan="8" class="p-8 text-center text-slate-400 italic">No schedules loaded. Generate a profile framework inside the left sidebar.</td></tr>`;
+                return;
+            }
+
+            dangerZone.classList.remove("hidden");
+
+            s2MasterProfilesList.forEach((profile, idx) => {
+                const tabButton = document.createElement("button");
+                if(idx === s2ActiveProfileIndex) {
+                    tabButton.className = "bg-white text-blue-700 font-bold px-3 py-1.5 text-xs rounded-lg border border-slate-200 shadow-xs cursor-pointer";
+                } else {
+                    tabButton.className = "bg-slate-200/60 hover:bg-slate-200 text-slate-600 px-3 py-1.5 text-xs font-semibold rounded-lg cursor-pointer transition-colors";
+                }
+                tabButton.innerText = profile.name;
+                tabButton.onclick = () => {
+                    s2ActiveProfileIndex = idx;
+                    loadProfileToFormWorkspace(idx);
+                    renderStep2TabsAndTable();
+                };
+                stripNode.appendChild(tabButton);
+            });
+
+            if(document.getElementById("s2EditingProfileIndex").value === "-1" && s2ActiveProfileIndex !== -1) {
+                loadProfileToFormWorkspace(s2ActiveProfileIndex);
+            }
+            renderStep2TaskRowsGrid();
+        }
+
+        function loadProfileToFormWorkspace(idx) {
+            const targetProfile = s2MasterProfilesList[idx];
+            if(!targetProfile) return;
+            document.getElementById("s2EditingProfileIndex").value = idx;
+            document.getElementById("s2ProfileName").value = targetProfile.name;
+            document.getElementById("s2FormTitle").innerText = "✏️ Edit Schedule Name";
+            document.getElementById("s2SubmitBtn").innerText = "Update Name";
+            document.getElementById("s2PasteBoxContainer").style.display = "none";
+            document.getElementById("s2FormResetBtn").classList.remove("hidden");
+        }
+
+        function resetStep2FormState() {
+            document.getElementById("s2EditingProfileIndex").value = "-1";
+            document.getElementById("step2ProfileForm").reset();
+            document.getElementById("s2FormTitle").innerText = "New Schedule Profile";
+            document.getElementById("s2SubmitBtn").innerText = "Save New Profile Template";
+            document.getElementById("s2PasteBoxContainer").style.display = "block";
+            document.getElementById("s2FormResetBtn").classList.add("hidden");
+        }
+
+        function deleteActiveProfileSequence() {
+            if(s2ActiveProfileIndex === -1 || s2MasterProfilesList.length === 0) return;
+            const activeName = s2MasterProfilesList[s2ActiveProfileIndex].name;
+            if(confirm(`Completely wipe "${activeName}" schedule sequence template and all its configurations?`)) {
+                s2MasterProfilesList.splice(s2ActiveProfileIndex, 1);
+                s2ActiveProfileIndex = s2MasterProfilesList.length > 0 ? 0 : -1;
+                localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
+                resetStep2FormState();
+                renderStep2TabsAndTable();
+            }
+        }
+
+        function renderStep2TaskRowsGrid() {
+            const tbody = document.getElementById("s2TaskTableBody");
+            tbody.innerHTML = "";
+            
+            if(s2ActiveProfileIndex === -1 || s2MasterProfilesList.length === 0) return;
+            const activeProfile = s2MasterProfilesList[s2ActiveProfileIndex];
+            if(!activeProfile || !activeProfile.tasks || activeProfile.tasks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 italic">No task metrics added to this profile framework yet.</td></tr>`;
+                return;
+            }
+
+            activeProfile.tasks.forEach((task, tIdx) => {
+                const row = document.createElement("tr");
+                if(task.isEditingRow) {
+                    let dropdownOptionsHtml = `<option value="">-- Add Trade --</option>`;
+                    s3TradesList.forEach(t => dropdownOptionsHtml += `<option value="${t.name}">${t.name}</option>`);
+
+                    let commonCrewOptionsHtml = `<option value="">-- Apply Step 5 Activity Preset --</option>`;
+                    s5CommonCrewsRegistry.forEach((crewBlueprint, cIdx) => {
+                        commonCrewOptionsHtml += `<option value="${cIdx}">${crewBlueprint.activityName}</option>`;
+                    });
+
+                    let activeAllocationBoxHtml = "";
+                    for(const [trade, qty] of Object.entries(task.tempCrewMatrix || {})) {
+                        activeAllocationBoxHtml += `
+                            <div class="flex items-center justify-between bg-slate-50 border p-1 rounded text-[11px] gap-1">
+                                <span class="truncate max-w-[120px] font-medium">${trade}</span>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" min="1" value="${qty}" onchange="changeTempCrewCountValue(${tIdx}, '${trade}', this.value)" class="w-9 text-center border font-bold bg-white text-slate-900">
+                                    <button type="button" onclick="killTradeFromTempCrewRow(${tIdx}, '${trade}')" class="text-red-500 font-bold px-1 text-xs">×</button>
+                                </div>
+                            </div>`;
+                    }
+
+                    row.innerHTML = `
+                        <td class="p-2"><input type="text" id="inlineId-${tIdx}" class="w-full border text-center p-1 font-mono font-bold" value="${task.id}"></td>
+                        <td class="p-2"><input type="text" id="inlineName-${tIdx}" class="w-full border p-1 font-semibold text-slate-800" value="${task.taskName}"></td>
+                        <td class="p-2"><input type="text" id="inlineDur-${tIdx}" class="w-full border text-center p-1" value="${task.duration}"></td>
+                        <td class="p-2"><input type="date" id="inlineStart-${tIdx}" class="w-full border p-1 font-mono text-[11px]" value="${task.startDate}"></td>
+                        <td class="p-2"><input type="date" id="inlineFinish-${tIdx}" class="w-full border p-1 font-mono text-[11px]" value="${task.finishDate}"></td>
+                        <td class="p-2 bg-emerald-50/10 space-y-1 border-x border-slate-200">
+                            <div>
+                                <select id="rowCrewPresetDropdown-${tIdx}" onchange="injectStep5CrewPresetToRow(${tIdx}, this.value)" class="w-full bg-blue-50 border border-blue-300 p-1 text-[10px] font-bold text-blue-900 rounded mb-1">
+                                    ${commonCrewOptionsHtml}
+                                </select>
+                            </div>
+                            <div class="flex gap-1">
+                                <select id="rowDropdown-${tIdx}" class="flex-1 bg-white border p-1 text-[11px] rounded">${dropdownOptionsHtml}</select>
+                                <button type="button" onclick="injectTradeToTempCrewRow(${tIdx})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2 rounded cursor-pointer">Add</button>
+                            </div>
+                            <div class="max-h-24 overflow-y-auto space-y-1 p-1 bg-white border rounded shadow-inner custom-scrollbar">${activeAllocationBoxHtml || '<span class="text-[10px] text-slate-400 italic block text-center py-1">None Selected</span>'}</div>
+                        </td>
+                        <td class="p-2"><input type="number" id="inlineProd-${tIdx}" class="w-full border p-1 text-center font-bold text-blue-800" value="${task.productivityRate || ''}"></td>
+                        <td class="p-2 text-center space-x-1 whitespace-nowrap">
+                            <button onclick="commitRowInlineSave(${tIdx})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-2 py-1 rounded text-[10px] cursor-pointer shadow-xs">Save</button>
+                            <button onclick="toggleRowEditStateState(${tIdx}, false)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2 py-1 rounded text-[10px] cursor-pointer">Cancel</button>
+                        </td>`;
+                } else {
+                    let badgeTrack = [];
+                    for (const [trade, qty] of Object.entries(task.crewFormations || {})) {
+                        if(qty > 0) badgeTrack.push(`<span class="inline-flex items-center bg-slate-100 border rounded px-1.5 py-0.5 m-0.5 text-[10px] font-semibold"><span class="bg-emerald-600 text-white font-black text-[9px] px-1 rounded mr-1">${qty}</span>${trade}</span>`);
+                    }
+                    row.innerHTML = `
+                        <td class="p-3 text-center font-mono text-slate-400 font-bold">${task.id}</td>
+                        <td class="p-3 font-semibold text-slate-900 truncate">${task.taskName}</td>
+                        <td class="p-3 text-center text-slate-500">${task.duration} d</td>
+                        <td class="p-3 text-center font-mono text-slate-600">${task.startDate}</td>
+                        <td class="p-3 text-center font-mono text-slate-600">${task.finishDate}</td>
+                        <td class="p-3 bg-emerald-50/5 border-x border-slate-100">${badgeTrack.length > 0 ? badgeTrack.join('') : '<span class="text-slate-300 italic text-[11px]">No crew defined</span>'}</td>
+                        <td class="p-3 text-center font-black text-blue-700 text-xs">${task.productivityRate || '-'}</td>
+                        <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                            <button onclick="toggleRowEditStateState(${tIdx}, true)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-2 py-1 rounded text-[10px] border shadow-xs cursor-pointer">Configure</button>
+                            <button onclick="deleteTaskNodeRowItem(${tIdx})" class="text-red-400 hover:text-red-600 font-black text-xs px-1 cursor-pointer">×</button>
+                        </td>`;
+                }
+                tbody.appendChild(row);
+            });
+        }
+
+        function toggleRowEditStateState(tIdx, stateFlag) {
+            let task = s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx];
+            task.isEditingRow = stateFlag;
+            if(stateFlag) task.tempCrewMatrix = { ...task.crewFormations };
+            renderStep2TaskRowsGrid();
+        }
+
+        function injectTradeToTempCrewRow(tIdx) {
+            const pick = document.getElementById(`rowDropdown-${tIdx}`).value;
+            if(!pick) return;
+            let task = s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx];
+            if(!task.tempCrewMatrix) task.tempCrewMatrix = {};
+            task.tempCrewMatrix[pick] = 1;
+            renderStep2TaskRowsGrid();
+        }
+
+        function injectStep5CrewPresetToRow(tIdx, crewBlueprintIndex) {
+            if(!crewBlueprintIndex) return;
+            const blueprint = s5CommonCrewsRegistry[parseInt(crewBlueprintIndex)];
+            if(!blueprint) return;
+            
+            let task = s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx];
+            task.tempCrewMatrix = { ...blueprint.crewFormations };
+            renderStep2TaskRowsGrid();
+        }
+
+        function changeTempCrewCountValue(tIdx, trade, val) { 
+            s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx].tempCrewMatrix[trade] = parseInt(val) || 1; 
+        }
+        
+        function killTradeFromTempCrewRow(tIdx, trade) { 
+            delete s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx].tempCrewMatrix[trade]; 
+            renderStep2TaskRowsGrid(); 
+        }
+
+        function commitRowInlineSave(tIdx) {
+            let task = s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx];
+            task.id = document.getElementById(`inlineId-${tIdx}`).value.trim();
+            task.taskName = document.getElementById(`inlineName-${tIdx}`).value.trim();
+            task.duration = document.getElementById(`inlineDur-${tIdx}`).value.trim();
+            task.startDate = document.getElementById(`inlineStart-${tIdx}`).value;
+            task.finishDate = document.getElementById(`inlineFinish-${tIdx}`).value;
+            task.crewFormations = { ...task.tempCrewMatrix };
+            task.productivityRate = document.getElementById(`inlineProd-${tIdx}`).value.trim();
+            task.isEditingRow = false;
+            
+            localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
+            renderStep2TaskRowsGrid();
+        }
+
+        function deleteTaskNodeRowItem(tIdx) {
+            if(confirm("Expunge task line?")) {
+                s2MasterProfilesList[s2ActiveProfileIndex].tasks.splice(tIdx, 1);
+                localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
+                renderStep2TaskRowsGrid();
+            }
+        }
+
+        // ==========================================
+        // STEP 4 METRIC OPERATIONS
+        // ==========================================
+        function renderStep4Table() {
+            const tbody = document.getElementById("s4TableBody");
+            document.getElementById("s4CountBadge").innerText = `${s4ContextRegistry.length} Registered`;
+            tbody.innerHTML = "";
+
+            if(s4ContextRegistry.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">No context mappings configured. Paste or write above.</td></tr>`;
+                return;
+            }
+
+            s4ContextRegistry.forEach((item, idx) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/60 transition-colors">
+                        <td class="p-3 pl-5 font-bold text-slate-800">${item.contractor}</td>
+                        <td class="p-3 font-mono font-bold text-blue-600">${item.block}</td>
+                        <td class="p-3 text-slate-600 italic">${item.typology}</td>
+                        <td class="p-3 text-center space-x-3">
+                            <button onclick="editStep4Node(${idx})" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Modify</button>
+                            <button onclick="deleteStep4Node(${idx})" class="text-red-500 hover:text-red-700 font-medium cursor-pointer">Remove</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function handleStep4Submit(e) {
+            e.preventDefault();
+            const contractorVal = document.getElementById("s4Contractor").value.trim();
+            const blockVal = document.getElementById("s4Block").value.trim();
+            const typologyVal = document.getElementById("s4Typology").value.trim();
+            const pasteData = document.getElementById("s4ExcelPaste").value;
+            const editingIdx = parseInt(document.getElementById("s4EditingIndex").value);
+
+            if (editingIdx === -1) {
+                if(pasteData.trim()) {
+                    let lines = pasteData.split(/\r?\n/);
+                    lines.forEach(line => {
+                        if(!line.trim()) return;
+                        const cells = line.split('\t');
+                        if(cells.length >= 2) {
+                            s4ContextRegistry.push({
+                                contractor: cells[0].trim(),
+                                block: cells[1].trim(),
+                                typology: cells[2] ? cells[2].trim() : "General Scope"
+                            });
+                        }
+                    });
+                } else {
+                    s4ContextRegistry.push({ contractor: contractorVal, block: blockVal, typology: typologyVal });
+                }
+            } else {
+                s4ContextRegistry[editingIdx] = { contractor: contractorVal, block: blockVal, typology: typologyVal };
+            }
+
+            localStorage.setItem(STORAGE_S4_KEY, JSON.stringify(s4ContextRegistry));
+            resetStep4FormState(); renderStep4Table();
+        }
+
+        function editStep4Node(idx) {
+            const data = s4ContextRegistry[idx];
+            document.getElementById("s4EditingIndex").value = idx;
+            document.getElementById("s4Contractor").value = data.contractor;
+            document.getElementById("s4Block").value = data.block;
+            document.getElementById("s4Typology").value = data.typology;
+
+            document.getElementById("s4FormTitle").innerText = "✏️ Edit Assignment Context";
+            document.getElementById("s4SubmitBtn").innerText = "Apply Updates";
+            document.getElementById("s4PasteWrapper").style.display = "none";
+            document.getElementById("s4CancelBtn").classList.remove("hidden");
+        }
+
+        function resetStep4FormState() {
+            document.getElementById("s4EditingIndex").value = "-1";
+            document.getElementById("step4ContextForm").reset();
+            document.getElementById("s4FormTitle").innerText = "Register Field Assignment";
+            document.getElementById("s4SubmitBtn").innerText = "Save Assignment Row";
+            document.getElementById("s4PasteWrapper").style.display = "block";
+            document.getElementById("s4CancelBtn").classList.add("hidden");
+        }
+
+        function deleteStep4Node(idx) {
+            if(confirm("Purge selected assignment map from validation list?")) {
+                s4ContextRegistry.splice(idx, 1);
+                localStorage.setItem(STORAGE_S4_KEY, JSON.stringify(s4ContextRegistry));
+                resetStep4FormState(); renderStep4Table();
+            }
+        }
+
+        // ==========================================
+        // STEP 5: COMMON ACTIVITY CREW CONFIGURATIONS METHODS
+        // ==========================================
+        function populateStep5TradeSelectors() {
+            const selector = document.getElementById("s5TradeSelector");
+            if(!selector) return;
+            selector.innerHTML = `<option value="">-- Choose Trade --</option>`;
+            s3TradesList.forEach(trade => {
+                selector.innerHTML += `<option value="${trade.name}">${trade.name}</option>`;
+            });
+        }
+
+        function addTradeToManualS5Stack() {
+            const trade = document.getElementById("s5TradeSelector").value;
+            const count = parseInt(document.getElementById("s5TradeCount").value) || 0;
+            
+            if(!trade || count <= 0) {
+                alert("Select a valid trade and provide a quantity count.");
+                return;
+            }
+            
+            s5ManualFormDraftStack[trade] = count;
+            document.getElementById("s5TradeCount").value = "";
+            renderStep5ManualDraftStackBox();
+        }
+
+        function removeTradeFromManualS5Stack(trade) {
+            delete s5ManualFormDraftStack[trade];
+            renderStep5ManualDraftStackBox();
+        }
+
+        function renderStep5ManualDraftStackBox() {
+            const container = document.getElementById("s5ManualStackBox");
+            const keys = Object.keys(s5ManualFormDraftStack);
+            
+            if(keys.length === 0) {
+                container.innerHTML = `<span class="text-[10px] text-slate-400 italic block text-center py-2">No individual manual assignments drafted yet.</span>`;
+                return;
+            }
+            
+            container.innerHTML = "";
+            keys.forEach(trade => {
+                const qty = s5ManualFormDraftStack[trade];
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-white border border-slate-200 px-2 py-1 rounded text-xs">
+                        <span class="font-medium text-slate-700">${trade}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">${qty} Assigned</span>
+                            <button type="button" onclick="removeTradeFromManualS5Stack('${trade}')" class="text-red-500 font-bold hover:text-red-700">×</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function renderStep5Table() {
+            const tbody = document.getElementById("s5TableBody");
+            document.getElementById("s5CountBadge").innerText = `${s5CommonCrewsRegistry.length} Activities`;
+            tbody.innerHTML = "";
+
+            if(s5CommonCrewsRegistry.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">No reusable activity profiles saved yet. Build or paste above.</td></tr>`;
+                return;
+            }
+
+            s5CommonCrewsRegistry.forEach((item, idx) => {
+                let badgeTrack = [];
+                for (const [trade, qty] of Object.entries(item.crewFormations || {})) {
+                    badgeTrack.push(`<span class="inline-flex items-center bg-slate-100 border rounded px-1.5 py-0.5 m-0.5 text-[10px] font-semibold"><span class="bg-purple-600 text-white font-black text-[9px] px-1 rounded mr-1">${qty}</span>${trade}</span>`);
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/60 transition-colors">
+                        <td class="p-3 text-center font-mono text-slate-400 font-bold">${idx + 1}</td>
+                        <td class="p-3 font-bold text-slate-800">${item.activityName}</td>
+                        <td class="p-3">${badgeTrack.length > 0 ? badgeTrack.join('') : '<span class="text-slate-300 italic">No crew mapped</span>'}</td>
+                        <td class="p-3 text-center space-x-3">
+                            <button onclick="editStep5Node(${idx})" class="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">Modify</button>
+                            <button onclick="deleteStep5Node(${idx})" class="text-red-500 hover:text-red-700 font-medium cursor-pointer">Remove</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function handleStep5Submit(e) {
+            e.preventDefault();
+            const nameVal = document.getElementById("s5ActivityName").value.trim();
+            const pasteData = document.getElementById("s5ExcelPaste").value;
+            const editingIdx = parseInt(document.getElementById("s5EditingIndex").value);
+
+            if (editingIdx === -1) {
+                if(pasteData.trim()) {
+                    let lines = pasteData.split(/\r?\n/);
+                    lines.forEach(line => {
+                        if(!line.trim()) return;
+                        const cells = line.split('\t');
+                        if(cells.length >= 1) {
+                            let parsedCrews = {};
+                            if(cells[1] && cells[1].trim()) {
+                                const parts = cells[1].trim().split(',');
+                                parts.forEach(part => {
+                                    const chunk = part.split(':');
+                                    if(chunk.length === 2) {
+                                        const tName = chunk[0].trim();
+                                        const tQty = parseInt(chunk[1].trim()) || 0;
+                                        if(tName && tQty > 0) parsedCrews[tName] = tQty;
+                                    }
+                                });
+                            }
+                            s5CommonCrewsRegistry.push({ activityName: cells[0].trim(), crewFormations: parsedCrews });
+                        }
+                    });
+                } else {
+                    if(Object.keys(s5ManualFormDraftStack).length === 0) {
+                        alert("Please configure a crew for manual setup or paste from Excel.");
+                        return;
+                    }
+                    s5CommonCrewsRegistry.push({ activityName: nameVal, crewFormations: { ...s5ManualFormDraftStack } });
+                }
+            } else {
+                s5CommonCrewsRegistry[editingIdx] = { activityName: nameVal, crewFormations: { ...s5ManualFormDraftStack } };
+            }
+
+            localStorage.setItem(STORAGE_S5_KEY, JSON.stringify(s5CommonCrewsRegistry));
+            resetStep5FormState(); 
+            renderStep5Table();
+            if(s2ActiveProfileIndex !== -1) {
+                renderStep2TaskRowsGrid();
+            }
+        }
+
+        function editStep5Node(idx) {
+            const data = s5CommonCrewsRegistry[idx];
+            document.getElementById("s5EditingIndex").value = idx;
+            document.getElementById("s5ActivityName").value = data.activityName;
+            s5ManualFormDraftStack = { ...data.crewFormations };
+            
+            document.getElementById("s5FormTitle").innerText = "✏️ Edit Activity Crew Preset";
+            document.getElementById("s5SubmitBtn").innerText = "Apply Template Changes";
+            document.getElementById("s5PasteWrapper").style.display = "none";
+            document.getElementById("s5CancelBtn").classList.remove("hidden");
+            
+            renderStep5ManualDraftStackBox();
+        }
+
+        function resetStep5FormState() {
+            document.getElementById("s5EditingIndex").value = "-1";
+            document.getElementById("step5CrewForm").reset();
+            s5ManualFormDraftStack = {};
+            
+            document.getElementById("s5FormTitle").innerText = "Configure Reusable Crew";
+            document.getElementById("s5SubmitBtn").innerText = "Save Crew Template";
+            document.getElementById("s5PasteWrapper").style.display = "block";
+            document.getElementById("s5CancelBtn").classList.add("hidden");
+            
+            renderStep5ManualDraftStackBox();
+        }
+
+        function deleteStep5Node(idx) {
+            if(confirm("Permanently delete this activity configuration baseline preset?")) {
+                s5CommonCrewsRegistry.splice(idx, 1);
+                localStorage.setItem(STORAGE_S5_KEY, JSON.stringify(s5CommonCrewsRegistry));
+                resetStep5FormState(); 
+                renderStep5Table();
+                if(s2ActiveProfileIndex !== -1) {
+                    renderStep2TaskRowsGrid();
+                }
+            }
+        }
+
+        // ==========================================
+        // MAIN DB HARD RECONCILIATION RESET
+        // ==========================================
+        function systemMasterHardReset() {
+            if(confirm("Wipe storage completely? All configurations will be lost unless backed up.")) {
+                localStorage.clear();
+                s2ActiveProfileIndex = 0;
+                s5ManualFormDraftStack = {};
+                loadAllDatabaseNodes();
+                ensureTestSeedData();
+                renderStep1Table();
+                renderStep3Table();
+                renderStep2TabsAndTable();
+                renderStep4Table();
+                renderStep5Table();
+                resetStep3FormState();
+                resetStep5FormState();
+            }
+        }
+    </script>
+</body>
+</html>
