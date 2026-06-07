@@ -17,12 +17,12 @@
 
     <div class="bg-slate-900 text-slate-400 text-[11px] px-4 py-2 border-b border-slate-800 flex justify-between items-center shadow-xs">
         <div class="flex items-center gap-4">
-            <span class="flex items-center gap-1.5 font-bold text-blue-400">
-                <span class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span> SYSTEM OK
+            <span class="flex items-center gap-1.5 font-bold text-emerald-400">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> GOOGLE CLOUD SYNCED
             </span>
-            <span>Environment: <strong class="text-white">Shared Local Storage DB Engine</strong></span>
+            <span>Environment: <strong class="text-white">Firebase Firestore Live Engine</strong></span>
         </div>
-        <div class="text-right font-mono">Control System Terminal v5.2</div>
+        <div class="text-right font-mono">Control System Terminal v6.0</div>
     </div>
 
     <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
@@ -35,17 +35,8 @@
             </div>
             
             <div class="flex flex-wrap gap-2">
-                <button onclick="exportSystemDatabase()" class="bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1">
-                    📥 Export Database Backup
-                </button>
-                
-                <label class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1">
-                    📤 Import Backup JSON
-                    <input type="file" accept=".json" onchange="importSystemDatabase(event)" class="hidden">
-                </label>
-
                 <button onclick="systemMasterHardReset()" class="bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer">
-                    ⚠️ Wipe & Reset Test Database
+                    ⚠️ Wipe Cloud Database
                 </button>
             </div>
         </header>
@@ -408,121 +399,132 @@
 
     </div>
 
-    <script>
-        const STORAGE_S1_KEY = "werwer_global_permanent_db";
-        const STORAGE_S2_KEY = "werwer_master_profiles_db";
-        const STORAGE_S3_KEY = "werwer_trades_db";
-        const STORAGE_S4_KEY = "werwer_project_context_db";
-        const STORAGE_S5_KEY = "werwer_common_crews_db";
+    <script type="module">
+          // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-        let s1GlobalPermanentPlan = {};
-        let s2MasterProfilesList = [];
-        let s3TradesList = [];
-        let s4ContextRegistry = [];
-        let s5CommonCrewsRegistry = [];
-        
-        let s2ActiveProfileIndex = 0;
-        let s5ManualFormDraftStack = {};
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDGZH3L8fGhm9-6r9amRIySJlr_ZTwQ1nU",
+    authDomain: "daily-deployment.firebaseapp.com",
+    projectId: "daily-deployment",
+    storageBucket: "daily-deployment.firebasestorage.app",
+    messagingSenderId: "117762026118",
+    appId: "1:117762026118:web:d95fdf2e74eb35e0347f07",
+    measurementId: "G-ZSR2F7YL7R"
+  };
+        };
 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const cloudDocRef = doc(db, "construction_system_db", "master_live_payload");
+
+        // Runtime Global State Architecture
+        window.s1GlobalPermanentPlan = {};
+        window.s2MasterProfilesList = [];
+        window.s3TradesList = [];
+        window.s4ContextRegistry = [];
+        window.s5CommonCrewsRegistry = [];
+        window.s2ActiveProfileIndex = 0;
+        window.s5ManualFormDraftStack = {};
+
+        // Bind core lifecycle execution points to the global browser object context
+        window.switchAdminTab = switchAdminTab;
+        window.handleStep1Submit = handleStep1Submit;
+        window.deleteStep1Node = deleteStep1Node;
+        window.handleStep3Submit = handleStep3Submit;
+        window.editStep3Node = editStep3Node;
+        window.resetStep3FormState = resetStep3FormState;
+        window.deleteStep3Node = deleteStep3Node;
+        window.handleStep2ProfileSubmit = handleStep2ProfileSubmit;
+        window.resetStep2FormState = resetStep2FormState;
+        window.deleteActiveProfileSequence = deleteActiveProfileSequence;
+        window.toggleRowEditStateState = toggleRowEditStateState;
+        window.injectTradeToTempCrewRow = injectTradeToTempCrewRow;
+        window.injectStep5CrewPresetToRow = injectStep5CrewPresetToRow;
+        window.changeTempCrewCountValue = changeTempCrewCountValue;
+        window.killTradeFromTempCrewRow = killTradeFromTempCrewRow;
+        window.commitRowInlineSave = commitRowInlineSave;
+        window.deleteTaskNodeRowItem = deleteTaskNodeRowItem;
+        window.handleStep4Submit = handleStep4Submit;
+        window.editStep4Node = editStep4Node;
+        window.resetStep4FormState = resetStep4FormState;
+        window.deleteStep4Node = deleteStep4Node;
+        window.addTradeToManualS5Stack = addTradeToManualS5Stack;
+        window.removeTradeFromManualS5Stack = removeTradeFromManualS5Stack;
+        window.handleStep5Submit = handleStep5Submit;
+        window.editStep5Node = editStep5Node;
+        window.resetStep5FormState = resetStep5FormState;
+        window.deleteStep5Node = deleteStep5Node;
+        window.systemMasterHardReset = systemMasterHardReset;
+
+        // Initialize Live Listening Core on Browser Stream Launch
         window.addEventListener("DOMContentLoaded", () => {
-            loadAllDatabaseNodes();
-            ensureTestSeedData();
+            onSnapshot(cloudDocRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const payload = docSnapshot.data();
+                    window.s1GlobalPermanentPlan = payload.s1 || {};
+                    window.s2MasterProfilesList = payload.s2 || [];
+                    window.s3TradesList = payload.s3 || [];
+                    window.s4ContextRegistry = payload.s4 || [];
+                    window.s5CommonCrewsRegistry = payload.s5 || [];
+                } else {
+                    // Seed initial layout vectors on pristine network cluster environments
+                    window.s1GlobalPermanentPlan = { "Project Manager": 1, "Site Engineer": 2, "Office Engineer": 1, "Foreman": 2 };
+                    window.s3TradesList = [ { name: "Bar Bender" }, { name: "Carpenter" }, { name: "Daily Laborer" }, { name: "Mason" } ];
+                    window.s2MasterProfilesList = [{
+                        name: "G+12 Structural Work Sequence",
+                        tasks: [
+                            { id: "1", taskName: "Excavation and Shoring", duration: "10", startDate: "2026-06-01", finishDate: "2026-06-11", crewFormations: { "Daily Laborer": 4 }, productivityRate: "120" },
+                            { id: "2", taskName: "Blinding Concrete C20", duration: "4", startDate: "2026-06-12", finishDate: "2026-06-16", crewFormations: { "Daily Laborer": 6, "Mason": 2 }, productivityRate: "45" },
+                            { id: "3", taskName: "Reinforcement Foundation", duration: "8", startDate: "2026-06-17", finishDate: "2026-06-25", crewFormations: { "Bar Bender": 12, "Daily Laborer": 3 }, productivityRate: "8.5" }
+                        ]
+                    }];
+                    window.s4ContextRegistry = [
+                        { contractor: "werwer con.", block: "Block A", typology: "B+G+12 Residential Block" },
+                        { contractor: "Al-Mansoori Contracting", block: "Block B", typology: "Commercial Warehouse G+1" }
+                    ];
+                    window.s5CommonCrewsRegistry = [
+                        { activityName: "Standard Shuttering Setup", crewFormations: { "Carpenter": 4, "Daily Laborer": 2 } },
+                        { activityName: "Heavy Blockwork Team", crewFormations: { "Mason": 5, "Daily Laborer": 4 } }
+                    ];
+                    pushStateMatrixToCloud();
+                }
+                
+                // Keep active focus constraints synchronized
+                if(window.s2MasterProfilesList.length > 0 && (window.s2ActiveProfileIndex === -1 || window.s2ActiveProfileIndex >= window.s2MasterProfilesList.length)) {
+                    window.s2ActiveProfileIndex = 0;
+                }
+                
+                triggerUIRenderCycle();
+            });
+        });
+
+        async function pushStateMatrixToCloud() {
+            try {
+                await setDoc(cloudDocRef, {
+                    s1: window.s1GlobalPermanentPlan,
+                    s2: window.s2MasterProfilesList,
+                    s3: window.s3TradesList,
+                    s4: window.s4ContextRegistry,
+                    s5: window.s5CommonCrewsRegistry
+                });
+            } catch (err) {
+                console.error("Firebase Sync Exception: Connection write constraint failure.", err);
+            }
+        }
+
+        function triggerUIRenderCycle() {
             renderStep1Table();
             renderStep3Table();
             renderStep2TabsAndTable();
             renderStep4Table();
             renderStep5Table();
             populateStep5TradeSelectors();
-        });
-
-        // ==========================================
-        // SYSTEM BACKUP & RESTORE UTILITY ENGINE
-        // ==========================================
-        function exportSystemDatabase() {
-            const backup = {
-                s1: localStorage.getItem(STORAGE_S1_KEY),
-                s2: localStorage.getItem(STORAGE_S2_KEY),
-                s3: localStorage.getItem(STORAGE_S3_KEY),
-                s4: localStorage.getItem(STORAGE_S4_KEY),
-                s5: localStorage.getItem(STORAGE_S5_KEY)
-            };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "construction_hub_db_backup.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importSystemDatabase(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const backup = JSON.parse(e.target.result);
-                    if(backup.s1) localStorage.setItem(STORAGE_S1_KEY, backup.s1);
-                    if(backup.s2) localStorage.setItem(STORAGE_S2_KEY, backup.s2);
-                    if(backup.s3) localStorage.setItem(STORAGE_S3_KEY, backup.s3);
-                    if(backup.s4) localStorage.setItem(STORAGE_S4_KEY, backup.s4);
-                    if(backup.s5) localStorage.setItem(STORAGE_S5_KEY, backup.s5);
-                    
-                    alert("Database successfully restored! Recompiling page layout framework...");
-                    window.location.reload();
-                } catch(err) {
-                    alert("CRITICAL ERROR: Invalid JSON template structure format.");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function loadAllDatabaseNodes() {
-            s1GlobalPermanentPlan = JSON.parse(localStorage.getItem(STORAGE_S1_KEY)) || {};
-            s2MasterProfilesList = JSON.parse(localStorage.getItem(STORAGE_S2_KEY)) || [];
-            s3TradesList = JSON.parse(localStorage.getItem(STORAGE_S3_KEY)) || [];
-            s4ContextRegistry = JSON.parse(localStorage.getItem(STORAGE_S4_KEY)) || [];
-            s5CommonCrewsRegistry = JSON.parse(localStorage.getItem(STORAGE_S5_KEY)) || [];
-            
-            if(s2MasterProfilesList.length > 0 && (s2ActiveProfileIndex === -1 || s2ActiveProfileIndex >= s2MasterProfilesList.length)) {
-                s2ActiveProfileIndex = 0;
-            }
-        }
-
-        function ensureTestSeedData() {
-            if(Object.keys(s1GlobalPermanentPlan).length === 0 && s2MasterProfilesList.length === 0 && s4ContextRegistry.length === 0 && s5CommonCrewsRegistry.length === 0) {
-                s1GlobalPermanentPlan = { "Project Manager": 1, "Site Engineer": 2, "Office Engineer": 1, "Foreman": 2 };
-                localStorage.setItem(STORAGE_S1_KEY, JSON.stringify(s1GlobalPermanentPlan));
-
-                s3TradesList = [ { name: "Bar Bender" }, { name: "Carpenter" }, { name: "Daily Laborer" }, { name: "Mason" } ];
-                localStorage.setItem(STORAGE_S3_KEY, JSON.stringify(s3TradesList));
-
-                s2MasterProfilesList = [{
-                    name: "G+12 Structural Work Sequence",
-                    tasks: [
-                        { id: "1", taskName: "Excavation and Shoring", duration: "10", startDate: "2026-06-01", finishDate: "2026-06-11", crewFormations: { "Daily Laborer": 4 }, productivityRate: "120" },
-                        { id: "2", taskName: "Blinding Concrete C20", duration: "4", startDate: "2026-06-12", finishDate: "2026-06-16", crewFormations: { "Daily Laborer": 6, "Mason": 2 }, productivityRate: "45" },
-                        { id: "3", taskName: "Reinforcement Foundation", duration: "8", startDate: "2026-06-17", finishDate: "2026-06-25", crewFormations: { "Bar Bender": 12, "Daily Laborer": 3 }, productivityRate: "8.5" }
-                    ]
-                }];
-                localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
-                s2ActiveProfileIndex = 0;
-
-                s4ContextRegistry = [
-                    { contractor: "werwer con.", block: "Block A", typology: "B+G+12 Residential Block" },
-                    { contractor: "Al-Mansoori Contracting", block: "Block B", typology: "Commercial Warehouse G+1" },
-                    { contractor: "Apex Build Systems", block: "Block C", typology: "Infrastructure Pump House" }
-                ];
-                localStorage.setItem(STORAGE_S4_KEY, JSON.stringify(s4ContextRegistry));
-
-                s5CommonCrewsRegistry = [
-                    { activityName: "Standard Shuttering Setup", crewFormations: { "Carpenter": 4, "Daily Laborer": 2 } },
-                    { activityName: "Heavy Blockwork Team", crewFormations: { "Mason": 5, "Daily Laborer": 4 } }
-                ];
-                localStorage.setItem(STORAGE_S5_KEY, JSON.stringify(s5CommonCrewsRegistry));
-
-                loadAllDatabaseNodes();
-            }
         }
 
         function switchAdminTab(activeTabId) {
@@ -537,9 +539,6 @@
                         : "flex-1 min-w-[140px] text-center font-bold px-4 py-2.5 rounded-lg text-xs transition-all cursor-pointer text-slate-600 hover:bg-white/60";
                 }
             });
-            if(activeTabId === 'tab-step2' || activeTabId === 'tab-step5') {
-                populateStep5TradeSelectors();
-            }
         }
 
         // ==========================================
@@ -547,11 +546,12 @@
         // ==========================================
         function renderStep1Table() {
             const tbody = document.getElementById("s1TableBody");
-            const roles = Object.keys(s1GlobalPermanentPlan);
+            if(!tbody) return;
+            const roles = Object.keys(window.s1GlobalPermanentPlan);
             document.getElementById("s1CountBadge").innerText = `${roles.length} Roles`;
             tbody.innerHTML = "";
             roles.forEach((role, idx) => {
-                const qty = s1GlobalPermanentPlan[role];
+                const qty = window.s1GlobalPermanentPlan[role];
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/60 transition-colors">
                         <td class="p-3 pl-5 font-mono text-slate-400 font-bold">${idx + 1}</td>
@@ -568,16 +568,15 @@
             e.preventDefault();
             const role = document.getElementById("s1RoleSelector").value;
             const qty = parseInt(document.getElementById("s1QtyInput").value) || 1;
-            s1GlobalPermanentPlan[role] = qty;
-            localStorage.setItem(STORAGE_S1_KEY, JSON.stringify(s1GlobalPermanentPlan));
-            document.getElementById("step1Form").reset(); renderStep1Table();
+            window.s1GlobalPermanentPlan[role] = qty;
+            document.getElementById("step1Form").reset(); 
+            pushStateMatrixToCloud();
         }
 
         function deleteStep1Node(role) {
             if(confirm(`Remove "${role}" baseline?`)) {
-                delete s1GlobalPermanentPlan[role];
-                localStorage.setItem(STORAGE_S1_KEY, JSON.stringify(s1GlobalPermanentPlan));
-                renderStep1Table();
+                delete window.s1GlobalPermanentPlan[role];
+                pushStateMatrixToCloud();
             }
         }
 
@@ -586,9 +585,10 @@
         // ==========================================
         function renderStep3Table() {
             const tbody = document.getElementById("s3TableBody");
-            document.getElementById("s3CountBadge").innerText = `${s3TradesList.length} Trades`;
+            if(!tbody) return;
+            document.getElementById("s3CountBadge").innerText = `${window.s3TradesList.length} Trades`;
             tbody.innerHTML = "";
-            s3TradesList.forEach((trade, idx) => {
+            window.s3TradesList.forEach((trade, idx) => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/60 transition-colors">
                         <td class="p-3 pl-5 font-mono text-slate-400 font-bold">TRD-${100 + idx}</td>
@@ -599,7 +599,6 @@
                         </td>
                     </tr>`;
             });
-            populateStep5TradeSelectors();
         }
 
         function handleStep3Submit(e) {
@@ -613,22 +612,21 @@
                     let lines = pasteData.split(/\r?\n/);
                     lines.forEach(line => {
                         if(!line.trim()) return;
-                        s3TradesList.push({ name: line.trim() });
+                        window.s3TradesList.push({ name: line.trim() });
                     });
                 } else {
-                    if(nameVal) s3TradesList.push({ name: nameVal });
+                    if(nameVal) window.s3TradesList.push({ name: nameVal });
                 }
             } else {
-                s3TradesList[editingIdx].name = nameVal;
+                window.s3TradesList[editingIdx].name = nameVal;
             }
 
-            localStorage.setItem(STORAGE_S3_KEY, JSON.stringify(s3TradesList));
             resetStep3FormState(); 
-            renderStep3Table();
+            pushStateMatrixToCloud();
         }
 
         function editStep3Node(idx) {
-            const data = s3TradesList[idx];
+            const data = window.s3TradesList[idx];
             document.getElementById("s3EditingIndex").value = idx;
             document.getElementById("s3TradeName").value = data.name;
 
@@ -648,11 +646,10 @@
         }
 
         function deleteStep3Node(idx) {
-            if(confirm(`Delete "${s3TradesList[idx].name}" trade?`)) {
-                s3TradesList.splice(idx, 1);
-                localStorage.setItem(STORAGE_S3_KEY, JSON.stringify(s3TradesList));
+            if(confirm(`Delete "${window.s3TradesList[idx].name}" trade?`)) {
+                window.s3TradesList.splice(idx, 1);
                 resetStep3FormState();
-                renderStep3Table();
+                pushStateMatrixToCloud();
             }
         }
 
@@ -667,7 +664,7 @@
 
             if (trackingIdx === -1) {
                 if(!pasteArea.trim()) {
-                    alert("Please paste Excel baseline timeline rows to compile tasks matrix.");
+                    alert("Please paste Excel baseline rows to compile matrix framework configuration.");
                     return;
                 }
 
@@ -711,27 +708,27 @@
                     return;
                 }
 
-                s2MasterProfilesList.push({ name: nameVal, tasks: parsedTasks });
-                s2ActiveProfileIndex = s2MasterProfilesList.length - 1;
+                window.s2MasterProfilesList.push({ name: nameVal, tasks: parsedTasks });
+                window.s2ActiveProfileIndex = window.s2MasterProfilesList.length - 1;
             } else {
-                s2MasterProfilesList[trackingIdx].name = nameVal;
+                window.s2MasterProfilesList[trackingIdx].name = nameVal;
             }
 
-            localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
             resetStep2FormState();
-            renderStep2TabsAndTable();
+            pushStateMatrixToCloud();
         }
 
         function renderStep2TabsAndTable() {
             const stripNode = document.getElementById("s2TabStrip");
             const countBadge = document.getElementById("s2ProfileCounter");
             const dangerZone = document.getElementById("s2DangerZone");
+            if(!stripNode) return;
             
             stripNode.innerHTML = "";
-            countBadge.innerText = `${s2MasterProfilesList.length} Profiles`;
+            countBadge.innerText = `${window.s2MasterProfilesList.length} Profiles`;
 
-            if(s2MasterProfilesList.length === 0) {
-                s2ActiveProfileIndex = -1;
+            if(window.s2MasterProfilesList.length === 0) {
+                window.s2ActiveProfileIndex = -1;
                 dangerZone.classList.add("hidden");
                 document.getElementById("s2TaskTableBody").innerHTML = `
                     <tr><td colspan="8" class="p-8 text-center text-slate-400 italic">No schedules loaded. Generate a profile framework inside the left sidebar.</td></tr>`;
@@ -740,30 +737,30 @@
 
             dangerZone.classList.remove("hidden");
 
-            s2MasterProfilesList.forEach((profile, idx) => {
+            window.s2MasterProfilesList.forEach((profile, idx) => {
                 const tabButton = document.createElement("button");
-                if(idx === s2ActiveProfileIndex) {
+                if(idx === window.s2ActiveProfileIndex) {
                     tabButton.className = "bg-white text-blue-700 font-bold px-3 py-1.5 text-xs rounded-lg border border-slate-200 shadow-xs cursor-pointer";
                 } else {
                     tabButton.className = "bg-slate-200/60 hover:bg-slate-200 text-slate-600 px-3 py-1.5 text-xs font-semibold rounded-lg cursor-pointer transition-colors";
                 }
                 tabButton.innerText = profile.name;
                 tabButton.onclick = () => {
-                    s2ActiveProfileIndex = idx;
+                    window.s2ActiveProfileIndex = idx;
                     loadProfileToFormWorkspace(idx);
                     renderStep2TabsAndTable();
                 };
                 stripNode.appendChild(tabButton);
             });
 
-            if(document.getElementById("s2EditingProfileIndex").value === "-1" && s2ActiveProfileIndex !== -1) {
-                loadProfileToFormWorkspace(s2ActiveProfileIndex);
+            if(document.getElementById("s2EditingProfileIndex").value === "-1" && window.s2ActiveProfileIndex !== -1) {
+                loadProfileToFormWorkspace(window.s2ActiveProfileIndex);
             }
             renderStep2TaskRowsGrid();
         }
 
         function loadProfileToFormWorkspace(idx) {
-            const targetProfile = s2MasterProfilesList[idx];
+            const targetProfile = window.s2MasterProfilesList[idx];
             if(!targetProfile) return;
             document.getElementById("s2EditingProfileIndex").value = idx;
             document.getElementById("s2ProfileName").value = targetProfile.name;
@@ -783,23 +780,23 @@
         }
 
         function deleteActiveProfileSequence() {
-            if(s2ActiveProfileIndex === -1 || s2MasterProfilesList.length === 0) return;
-            const activeName = s2MasterProfilesList[s2ActiveProfileIndex].name;
+            if(window.s2ActiveProfileIndex === -1 || window.s2MasterProfilesList.length === 0) return;
+            const activeName = window.s2MasterProfilesList[window.s2ActiveProfileIndex].name;
             if(confirm(`Completely wipe "${activeName}" schedule sequence template and all its configurations?`)) {
-                s2MasterProfilesList.splice(s2ActiveProfileIndex, 1);
-                s2ActiveProfileIndex = s2MasterProfilesList.length > 0 ? 0 : -1;
-                localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
+                window.s2MasterProfilesList.splice(window.s2ActiveProfileIndex, 1);
+                window.s2ActiveProfileIndex = window.s2MasterProfilesList.length > 0 ? 0 : -1;
                 resetStep2FormState();
-                renderStep2TabsAndTable();
+                pushStateMatrixToCloud();
             }
         }
 
         function renderStep2TaskRowsGrid() {
             const tbody = document.getElementById("s2TaskTableBody");
+            if(!tbody) return;
             tbody.innerHTML = "";
             
-            if(s2ActiveProfileIndex === -1 || s2MasterProfilesList.length === 0) return;
-            const activeProfile = s2MasterProfilesList[s2ActiveProfileIndex];
+            if(window.s2ActiveProfileIndex === -1 || window.s2MasterProfilesList.length === 0) return;
+            const activeProfile = window.s2MasterProfilesList[window.s2ActiveProfileIndex];
             if(!activeProfile || !activeProfile.tasks || activeProfile.tasks.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 italic">No task metrics added to this profile framework yet.</td></tr>`;
                 return;
@@ -809,10 +806,10 @@
                 const row = document.createElement("tr");
                 if(task.isEditingRow) {
                     let dropdownOptionsHtml = `<option value="">-- Add Trade --</option>`;
-                    s3TradesList.forEach(t => dropdownOptionsHtml += `<option value="${t.name}">${t.name}</option>`);
+                    window.s3TradesList.forEach(t => dropdownOptionsHtml += `<option value="${t.name}">${t.name}</option>`);
 
                     let commonCrewOptionsHtml = `<option value="">-- Apply Step 5 Activity Preset --</option>`;
-                    s5CommonCrewsRegistry.forEach((crewBlueprint, cIdx) => {
+                    window.s5CommonCrewsRegistry.forEach((crewBlueprint, cIdx) => {
                         commonCrewOptionsHtml += `<option value="${cIdx}">${crewBlueprint.activityName}</option>`;
                     });
 
@@ -874,7 +871,7 @@
         }
 
         function toggleRowEditStateState(tIdx, stateFlag) {
-            let task = s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx];
+            let task = window.s2MasterProfilesList[window.s2ActiveProfileIndex].tasks[tIdx];
             task.isEditingRow = stateFlag;
             if(stateFlag) task.tempCrewMatrix = { ...task.crewFormations };
             renderStep2TaskRowsGrid();
@@ -883,7 +880,7 @@
         function injectTradeToTempCrewRow(tIdx) {
             const pick = document.getElementById(`rowDropdown-${tIdx}`).value;
             if(!pick) return;
-            let task = s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx];
+            let task = window.s2MasterProfilesList[window.s2ActiveProfileIndex].tasks[tIdx];
             if(!task.tempCrewMatrix) task.tempCrewMatrix = {};
             task.tempCrewMatrix[pick] = 1;
             renderStep2TaskRowsGrid();
@@ -891,25 +888,24 @@
 
         function injectStep5CrewPresetToRow(tIdx, crewBlueprintIndex) {
             if(!crewBlueprintIndex) return;
-            const blueprint = s5CommonCrewsRegistry[parseInt(crewBlueprintIndex)];
+            const blueprint = window.s5CommonCrewsRegistry[parseInt(crewBlueprintIndex)];
             if(!blueprint) return;
-            
-            let task = s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx];
+            let task = window.s2MasterProfilesList[window.s2ActiveProfileIndex].tasks[tIdx];
             task.tempCrewMatrix = { ...blueprint.crewFormations };
             renderStep2TaskRowsGrid();
         }
 
         function changeTempCrewCountValue(tIdx, trade, val) { 
-            s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx].tempCrewMatrix[trade] = parseInt(val) || 1; 
+            window.s2MasterProfilesList[window.s2ActiveProfileIndex].tasks[tIdx].tempCrewMatrix[trade] = parseInt(val) || 1; 
         }
         
         function killTradeFromTempCrewRow(tIdx, trade) { 
-            delete s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx].tempCrewMatrix[trade]; 
+            delete window.s2MasterProfilesList[window.s2ActiveProfileIndex].tasks[tIdx].tempCrewMatrix[trade]; 
             renderStep2TaskRowsGrid(); 
         }
 
         function commitRowInlineSave(tIdx) {
-            let task = s2MasterProfilesList[s2ActiveProfileIndex].tasks[tIdx];
+            let task = window.s2MasterProfilesList[window.s2ActiveProfileIndex].tasks[tIdx];
             task.id = document.getElementById(`inlineId-${tIdx}`).value.trim();
             task.taskName = document.getElementById(`inlineName-${tIdx}`).value.trim();
             task.duration = document.getElementById(`inlineDur-${tIdx}`).value.trim();
@@ -918,16 +914,13 @@
             task.crewFormations = { ...task.tempCrewMatrix };
             task.productivityRate = document.getElementById(`inlineProd-${tIdx}`).value.trim();
             task.isEditingRow = false;
-            
-            localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
-            renderStep2TaskRowsGrid();
+            pushStateMatrixToCloud();
         }
 
         function deleteTaskNodeRowItem(tIdx) {
             if(confirm("Expunge task line?")) {
-                s2MasterProfilesList[s2ActiveProfileIndex].tasks.splice(tIdx, 1);
-                localStorage.setItem(STORAGE_S2_KEY, JSON.stringify(s2MasterProfilesList));
-                renderStep2TaskRowsGrid();
+                window.s2MasterProfilesList[window.s2ActiveProfileIndex].tasks.splice(tIdx, 1);
+                pushStateMatrixToCloud();
             }
         }
 
@@ -936,15 +929,16 @@
         // ==========================================
         function renderStep4Table() {
             const tbody = document.getElementById("s4TableBody");
-            document.getElementById("s4CountBadge").innerText = `${s4ContextRegistry.length} Registered`;
+            if(!tbody) return;
+            document.getElementById("s4CountBadge").innerText = `${window.s4ContextRegistry.length} Registered`;
             tbody.innerHTML = "";
 
-            if(s4ContextRegistry.length === 0) {
+            if(window.s4ContextRegistry.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">No context mappings configured. Paste or write above.</td></tr>`;
                 return;
             }
 
-            s4ContextRegistry.forEach((item, idx) => {
+            window.s4ContextRegistry.forEach((item, idx) => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/60 transition-colors">
                         <td class="p-3 pl-5 font-bold text-slate-800">${item.contractor}</td>
@@ -973,7 +967,7 @@
                         if(!line.trim()) return;
                         const cells = line.split('\t');
                         if(cells.length >= 2) {
-                            s4ContextRegistry.push({
+                            window.s4ContextRegistry.push({
                                 contractor: cells[0].trim(),
                                 block: cells[1].trim(),
                                 typology: cells[2] ? cells[2].trim() : "General Scope"
@@ -981,18 +975,18 @@
                         }
                     });
                 } else {
-                    s4ContextRegistry.push({ contractor: contractorVal, block: blockVal, typology: typologyVal });
+                    window.s4ContextRegistry.push({ contractor: contractorVal, block: blockVal, typology: typologyVal });
                 }
             } else {
-                s4ContextRegistry[editingIdx] = { contractor: contractorVal, block: blockVal, typology: typologyVal };
+                window.s4ContextRegistry[editingIdx] = { contractor: contractorVal, block: blockVal, typology: typologyVal };
             }
 
-            localStorage.setItem(STORAGE_S4_KEY, JSON.stringify(s4ContextRegistry));
-            resetStep4FormState(); renderStep4Table();
+            resetStep4FormState(); 
+            pushStateMatrixToCloud();
         }
 
         function editStep4Node(idx) {
-            const data = s4ContextRegistry[idx];
+            const data = window.s4ContextRegistry[idx];
             document.getElementById("s4EditingIndex").value = idx;
             document.getElementById("s4Contractor").value = data.contractor;
             document.getElementById("s4Block").value = data.block;
@@ -1015,9 +1009,9 @@
 
         function deleteStep4Node(idx) {
             if(confirm("Purge selected assignment map from validation list?")) {
-                s4ContextRegistry.splice(idx, 1);
-                localStorage.setItem(STORAGE_S4_KEY, JSON.stringify(s4ContextRegistry));
-                resetStep4FormState(); renderStep4Table();
+                window.s4ContextRegistry.splice(idx, 1);
+                resetStep4FormState(); 
+                pushStateMatrixToCloud();
             }
         }
 
@@ -1028,7 +1022,7 @@
             const selector = document.getElementById("s5TradeSelector");
             if(!selector) return;
             selector.innerHTML = `<option value="">-- Choose Trade --</option>`;
-            s3TradesList.forEach(trade => {
+            window.s3TradesList.forEach(trade => {
                 selector.innerHTML += `<option value="${trade.name}">${trade.name}</option>`;
             });
         }
@@ -1042,19 +1036,20 @@
                 return;
             }
             
-            s5ManualFormDraftStack[trade] = count;
+            window.s5ManualFormDraftStack[trade] = count;
             document.getElementById("s5TradeCount").value = "";
             renderStep5ManualDraftStackBox();
         }
 
         function removeTradeFromManualS5Stack(trade) {
-            delete s5ManualFormDraftStack[trade];
+            delete window.s5ManualFormDraftStack[trade];
             renderStep5ManualDraftStackBox();
         }
 
         function renderStep5ManualDraftStackBox() {
             const container = document.getElementById("s5ManualStackBox");
-            const keys = Object.keys(s5ManualFormDraftStack);
+            if(!container) return;
+            const keys = Object.keys(window.s5ManualFormDraftStack);
             
             if(keys.length === 0) {
                 container.innerHTML = `<span class="text-[10px] text-slate-400 italic block text-center py-2">No individual manual assignments drafted yet.</span>`;
@@ -1063,7 +1058,7 @@
             
             container.innerHTML = "";
             keys.forEach(trade => {
-                const qty = s5ManualFormDraftStack[trade];
+                const qty = window.s5ManualFormDraftStack[trade];
                 container.innerHTML += `
                     <div class="flex items-center justify-between bg-white border border-slate-200 px-2 py-1 rounded text-xs">
                         <span class="font-medium text-slate-700">${trade}</span>
@@ -1077,15 +1072,16 @@
 
         function renderStep5Table() {
             const tbody = document.getElementById("s5TableBody");
-            document.getElementById("s5CountBadge").innerText = `${s5CommonCrewsRegistry.length} Activities`;
+            if(!tbody) return;
+            document.getElementById("s5CountBadge").innerText = `${window.s5CommonCrewsRegistry.length} Activities`;
             tbody.innerHTML = "";
 
-            if(s5CommonCrewsRegistry.length === 0) {
+            if(window.s5CommonCrewsRegistry.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">No reusable activity profiles saved yet. Build or paste above.</td></tr>`;
                 return;
             }
 
-            s5CommonCrewsRegistry.forEach((item, idx) => {
+            window.s5CommonCrewsRegistry.forEach((item, idx) => {
                 let badgeTrack = [];
                 for (const [trade, qty] of Object.entries(item.crewFormations || {})) {
                     badgeTrack.push(`<span class="inline-flex items-center bg-slate-100 border rounded px-1.5 py-0.5 m-0.5 text-[10px] font-semibold"><span class="bg-purple-600 text-white font-black text-[9px] px-1 rounded mr-1">${qty}</span>${trade}</span>`);
@@ -1129,33 +1125,29 @@
                                     }
                                 });
                             }
-                            s5CommonCrewsRegistry.push({ activityName: cells[0].trim(), crewFormations: parsedCrews });
+                            window.s5CommonCrewsRegistry.push({ activityName: cells[0].trim(), crewFormations: parsedCrews });
                         }
                     });
                 } else {
-                    if(Object.keys(s5ManualFormDraftStack).length === 0) {
+                    if(Object.keys(window.s5ManualFormDraftStack).length === 0) {
                         alert("Please configure a crew for manual setup or paste from Excel.");
                         return;
                     }
-                    s5CommonCrewsRegistry.push({ activityName: nameVal, crewFormations: { ...s5ManualFormDraftStack } });
+                    window.s5CommonCrewsRegistry.push({ activityName: nameVal, crewFormations: { ...window.s5ManualFormDraftStack } });
                 }
             } else {
-                s5CommonCrewsRegistry[editingIdx] = { activityName: nameVal, crewFormations: { ...s5ManualFormDraftStack } };
+                window.s5CommonCrewsRegistry[editingIdx] = { activityName: nameVal, crewFormations: { ...window.s5ManualFormDraftStack } };
             }
 
-            localStorage.setItem(STORAGE_S5_KEY, JSON.stringify(s5CommonCrewsRegistry));
             resetStep5FormState(); 
-            renderStep5Table();
-            if(s2ActiveProfileIndex !== -1) {
-                renderStep2TaskRowsGrid();
-            }
+            pushStateMatrixToCloud();
         }
 
         function editStep5Node(idx) {
-            const data = s5CommonCrewsRegistry[idx];
+            const data = window.s5CommonCrewsRegistry[idx];
             document.getElementById("s5EditingIndex").value = idx;
             document.getElementById("s5ActivityName").value = data.activityName;
-            s5ManualFormDraftStack = { ...data.crewFormations };
+            window.s5ManualFormDraftStack = { ...data.crewFormations };
             
             document.getElementById("s5FormTitle").innerText = "✏️ Edit Activity Crew Preset";
             document.getElementById("s5SubmitBtn").innerText = "Apply Template Changes";
@@ -1168,7 +1160,7 @@
         function resetStep5FormState() {
             document.getElementById("s5EditingIndex").value = "-1";
             document.getElementById("step5CrewForm").reset();
-            s5ManualFormDraftStack = {};
+            window.s5ManualFormDraftStack = {};
             
             document.getElementById("s5FormTitle").innerText = "Configure Reusable Crew";
             document.getElementById("s5SubmitBtn").innerText = "Save Crew Template";
@@ -1180,33 +1172,24 @@
 
         function deleteStep5Node(idx) {
             if(confirm("Permanently delete this activity configuration baseline preset?")) {
-                s5CommonCrewsRegistry.splice(idx, 1);
-                localStorage.setItem(STORAGE_S5_KEY, JSON.stringify(s5CommonCrewsRegistry));
+                window.s5CommonCrewsRegistry.splice(idx, 1);
                 resetStep5FormState(); 
-                renderStep5Table();
-                if(s2ActiveProfileIndex !== -1) {
-                    renderStep2TaskRowsGrid();
-                }
+                pushStateMatrixToCloud();
             }
         }
 
-        // ==========================================
-        // MAIN DB HARD RECONCILIATION RESET
-        // ==========================================
         function systemMasterHardReset() {
-            if(confirm("Wipe storage completely? All configurations will be lost unless backed up.")) {
-                localStorage.clear();
-                s2ActiveProfileIndex = 0;
-                s5ManualFormDraftStack = {};
-                loadAllDatabaseNodes();
-                ensureTestSeedData();
-                renderStep1Table();
-                renderStep3Table();
-                renderStep2TabsAndTable();
-                renderStep4Table();
-                renderStep5Table();
+            if(confirm("Wipe cloud database completely? This action immediately clears all shared instances.")) {
+                window.s1GlobalPermanentPlan = {};
+                window.s2MasterProfilesList = [];
+                window.s3TradesList = [];
+                window.s4ContextRegistry = [];
+                window.s5CommonCrewsRegistry = [];
+                window.s2ActiveProfileIndex = 0;
+                window.s5ManualFormDraftStack = {};
                 resetStep3FormState();
                 resetStep5FormState();
+                pushStateMatrixToCloud();
             }
         }
     </script>
